@@ -1,0 +1,38 @@
+﻿@model Optimization.ProductionParameters
+
+<label for="PlanningHorizon">Planning Horizon</label>
+@Html.DisplayFor(m => m.PlanningHorizon) months
+<br />
+<label for="DefaultBatchSize">Default Batch size</label>
+@Html.DisplayFor(m => m.DefaultBatchSize) days
+<br />
+<label for="SpecificBatchSizes">Specific Batch sizes</label>
+@foreach (var batchSize in Model.SpecificBatchSizes)
+{
+    <span>@batchSize.Key</span>
+    @Html.DisplayFor(m => batchSize.Value)
+}
+<br />
+<label for="GapBetweenBatches">Gap between Batches</label>
+@Html.DisplayFor(m => m.GapBetweenBatches) days
+<br />
+<label for="DeadTimes">Dead times</label>
+@(Model.DeadTimes * 100)%
+<br />
+<label for="MaxDelayPerYear">Max delay per year</label>
+@Html.DisplayFor(m => m.MaxDelayPerYear) days
+<br />
+<label for="MaxIndividualDelay">Max individual delay</label>
+@Html.DisplayFor(m => m.MaxIndividualDelay) days
+<br />
+<label for="MaxAdvancePerYear">Max advance per year</label>
+@Html.DisplayFor(m => m.MaxAdvancePerYear) days
+<br />
+<label for="MaxIndividualAdvance">Max individual advance</label>
+@Html.DisplayFor(m => m.MaxIndividualAdvance) days
+<br />
+<label for="WeeklyDelayInterest">Weekly delay interest</label>
+@(Math.Round(Model.WeeklyDelayInterest * 100, 5))%
+<br />
+<label for="WeeklyAdvanceInterest">Weekly advance interest</label>
+@(Math.Round(Model.WeeklyAdvanceInterest * 100, 5))%

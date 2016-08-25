@@ -1,0 +1,16 @@
+﻿@using UI.Models
+@using Optimization.DataModel;
+@model ScheduleViewModel
+
+@{
+    ViewBag.Title = "MustWinIdentification";
+}
+
+<h2>MustWin Identification</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.Partial("_WizardFooter", new WizardViewModel() { Step = 4 })
+}

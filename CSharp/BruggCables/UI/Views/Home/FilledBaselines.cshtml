@@ -1,0 +1,74 @@
+﻿@using UI.Models
+@using Optimization.DataModel;
+@model ScheduleViewModel
+
+@{
+    ViewBag.Title = "FilledBaselines";
+}
+
+<h2>Filled Baselines</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="form-group" style="height:600px; overflow:auto;">
+        <table id="filledBaselineTable" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Margin</th>
+                    <th>Days Overlay</th>
+                    <th>Insecurity</th>
+                    <th>Baseline</th>
+                    <th>Schedule</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    for (int i = 0; i < Model.FilledBaselines.Count; i++)
+                    {
+                        var filledBaseline = Model.FilledBaselines[i];
+                        string tooltip = string.Join("\n", filledBaseline.Baseline.Projects.Select(p => p.Description));
+                        <tr>
+                            <td>@filledBaseline.CalculateTotalMargin()</td>
+                            <td>@filledBaseline.CalculateTotalDaysOfOverlay()</td>
+                            <td>@(filledBaseline.CalculateInsecurity() * 100)%</td>
+                            <td data-order="@(Model.SelectedBaselines.IndexOf(filledBaseline.Baseline))">
+                                <span data-toggle="tooltip" data-placement="right" title="@tooltip">@(filledBaseline.Baseline.Projects.Count) projects</span>
+                            </td>
+                            <td>@Html.ActionLink(
+                                    "Calculate a schedule",  // linkText
+                                    "Schedule",              // actionName
+                                    "Home",                  // controllerName
+                                    new
+                                    {                        // routeValues
+                                        projects = string.Join("-",filledBaseline.Projects.Select(p => p.Nr).ToArray())
+                                    },
+                                    null                     // htmlAttributes
+                                )
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    @Html.Partial("_WizardFooter", new WizardViewModel() { Step = 3 })
+}
+
+@section scripts {
+    <script>
+    $(document).ready(function() {
+        baselineTable = $('#filledBaselineTable').DataTable({
+            "order": [[1, "desc"]]
+        });
+        /*$('#baselineTable input:checkbox').click(function () {
+            var i = $(this);
+            i.parent().attr('data-order', i.is(":checked") ? "1" : "0");
+            baselineTable
+                .row(i.parent().parent())
+                .invalidate()
+                .draw();
+        })*/
+    });
+    </script>
+}

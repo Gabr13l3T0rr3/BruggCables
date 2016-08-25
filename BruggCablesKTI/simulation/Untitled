@@ -1,0 +1,22 @@
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from copy import copy
+from itertools import combinations as itercomb
+
+from dateutil import relativedelta
+import numpy as np
+import pandas as pd
+
+START_DATE = datetime(2016, 1, 1) # start scheduling time
+N_CLUSTERS = 7                    # number of cluster in the schedule
+
+END_DATE = START_DATE + relativedelta.relativedelta(months = N_CLUSTERS)
+                                  # end scheduling time
+MAX_LOAD_L1 = 24.                 # hours per day
+MAX_LOAD_L2 = 24.                 # hours per day
+OVER_FACTOR = 1.5                 # overload acceptance factor
+MAX_VOLTAGE_L1 = 630.             # max voltage for line 1
+MAX_AREA_L1 = 150. 	              # max area for line 1
+MID_SIZE_LEVEL = 2.e6
+
+sched_hours = 2 * (END_DATE - START_DATE).total_seconds() / 3600.

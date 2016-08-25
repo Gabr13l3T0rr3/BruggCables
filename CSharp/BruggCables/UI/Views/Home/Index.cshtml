@@ -1,0 +1,38 @@
+﻿@using UI.Models
+@using Optimization.DataModel;
+@model ScheduleViewModel
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1>Brugg Cables Production Planning Optimization Dashboard</h1>
+    <p class="lead">Welcome to Brugg Cables dashboard.</p>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <p style="text-align:center; font-size: 25px; padding:30px 0px">
+            @Html.ActionLink("Load optimization", "PrioritySelection", "Home", null, new { @class = "btn btn-default", @style="font-size:inherit;" })
+            <span style="font-size:30px; margin: 0px 10px">OR</span>
+            @Html.ActionLink("Create new optimization", "PrioritySelection", "Home", null, new { @class = "btn btn-default", @style = "font-size:inherit;" })
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <h2>Wizard</h2>
+        <p>Let's go to wizard!<br  />@Html.ActionLink("Goooooo!!! »", "PrioritySelection", "Home", null, new { @class = "btn btn-default" })</p>
+    </div>
+    <div class="col-md-4">
+        <h2>Production Parameters</h2>
+        @Html.Partial("_ProductionParametersPartial", Model.Parameters)
+        <p><a class="btn btn-default" href="">Edit &raquo;</a></p>
+    </div>
+    <div class="col-md-4">
+        <h2>Changelog</h2>
+        <p>29.07.16: New optimization (Roman Bolzern)</p>
+        <p>29.07.16: New dataset</p>
+        <p>27.07.16: New optimization (Willy the cable guy)</p>
+        <p>27.07.16: New parameters (Willy the cable guy)</p>
+    </div>
+</div>

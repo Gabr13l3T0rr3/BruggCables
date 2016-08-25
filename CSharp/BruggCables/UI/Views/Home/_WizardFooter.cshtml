@@ -1,0 +1,19 @@
+﻿@using UI.Models
+@using Optimization.DataModel;
+@model UI.Models.WizardViewModel
+
+<div style="width:100%; position:relative; height:30px; text-align:center;">
+    Step @Model.Step/@Model.Pages.Count()
+    @{
+        if (Model.Step > 1)
+        {            
+            @*<a class="btn btn-default" href="@Model.Pages[Model.Step - 2]" style="position:absolute; left:0px; top:0px;" name="Back">Back</a>*@
+            <input class="btn btn-default" type="submit" style="position:absolute; left:0px; top:0px;" value="Back" name="Back" />
+        }
+        if (Model.Step < Model.Pages.Count())
+        {
+            @* @Html.ActionLink("Continue", Model.Pages[Model.Step], "Home", routeValues: null, htmlAttributes: new { @style = "position:absolute; right:0px; top:0px;", @class = "btn btn-default" }) *@
+            <input class="btn btn-default" type="submit" style="position:absolute; right:0px; top:0px;" value="Continue" name="Continue" />
+        }
+    }
+</div>

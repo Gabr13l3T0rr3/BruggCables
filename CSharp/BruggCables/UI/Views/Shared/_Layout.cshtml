@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Brugg Cables Production Planning</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @RenderSection("Styles", false)
+    @Scripts.Render("~/bundles/jquery")
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("BCPP", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                    <li>@Html.ActionLink("About", "About", "Home")</li>
+                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                </ul>
+                @Html.Partial("_LoginPartial")
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <div class="dropdown" style="margin: 8px 0px 0px 0px">
+                            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" >
+                                Dataset <strong>current</strong>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuDivider">
+                                <li><a href="">Show Opportunities</a></li>
+                                <li><a href="">Show Projects</a></li>
+                                <li>@Html.ActionLink("Statistics", "Statistics", "Dataset")</li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="">Switch Dataset</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - Brugg Cables Production Planning</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/d3")
+    @Scripts.Render("~/bundles/bootstrap")
+    <script>
+        Date.prototype.addDays = function (days) {
+            var dat = new Date(this.valueOf());
+            dat.setDate(dat.getDate() + days);
+            return dat;
+        }
+
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+
+<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+<h2>Index</h2>
+
+<p>Hello from our View Template!</p>
+
+
+<script>
+    var tasks = [{
+        "startDate": new Date("Sun Dec 09 01:36:45 EST 2012"),
+        "endDate": new Date("Sun Dec 09 02:36:45 EST 2012"),
+        "taskName": "E Job",
+        "status": "OPPORTUNITY"
+    }];
+    var taskNames = ["D Job", "P Job", "E Job", "A Job", "N Job"];
+
+    var taskStatus = {
+        "OPPORTUNITY": "bar",
+        "PROJECT": "bar-running"
+    };
+
+    tasks.sort(function (a, b) {
+        return a.endDate - b.endDate;
+    });
+    var maxDate = tasks[tasks.length - 1].endDate;
+    tasks.sort(function (a, b) {
+        return a.startDate - b.startDate;
+    });
+    var minDate = tasks[0].startDate;
+
+    var format = "%H:%M";
+    var timeDomainString = "1day";
+
+
+    var gantt = d3.gantt().taskTypes(taskNames).taskStatus(taskStatus).tickFormat(format).height(450).width(800);
+    gantt.timeDomain([d3.time.day.offset(getEndDate(), -1), getEndDate()]);
+    gantt(tasks);
+</script>

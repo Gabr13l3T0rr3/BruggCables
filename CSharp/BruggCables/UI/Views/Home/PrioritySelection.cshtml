@@ -1,0 +1,31 @@
+﻿@using UI.Models
+@using Optimization.DataModel;
+@model ScheduleViewModel
+@{
+    ViewBag.Title = "PrioritySelection";
+}
+
+<h2>PrioritySelection</h2>
+
+<!-- Maybe a step before where we make sure there are no opportunities which are already projects? This consistency isn't guaranteed -->
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="form-group" style="height:600px; overflow:auto;">
+        @{
+            foreach (var project in Model.DataContext.Scenario.Projects.Where(p => p is Opportunity).OrderByDescending(p => p.Margin))
+            {
+                string chkd = (Model.PriorityOpportunities.Contains(project)) ? "checked=\"checked\"" : string.Empty;
+                <div class="checkbox">
+                    <label><input type="checkbox" name="@project.Nr" @(chkd)>@project.Description</label>
+                </div>
+            }
+        }
+    </div>
+    <div class="alert alert-warning" role="alert">
+        <strong>Warning!</strong> Projects x and y are badly combineable
+    </div>
+
+    @Html.Partial("_WizardFooter", new WizardViewModel() { Step = 1 })
+}

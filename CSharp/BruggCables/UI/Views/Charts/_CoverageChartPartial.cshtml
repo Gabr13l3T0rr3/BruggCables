@@ -1,0 +1,91 @@
+﻿@using System;
+@using System.Linq
+@using System.Collections
+@using System.Collections.Generic
+@model Scenario
+
+<svg id="riskChart"></svg>
+<script>
+
+    $(document).ready(function () {
+        @{
+            if (Session["coverageJSON"] == null) {
+                Session["coverageJSON"] = Newtonsoft.Json.JsonConvert.SerializeObject(Optimization.Analyzation.AllocationRisk.TestForCoverage(Model));
+            }
+            string serializedObject = (string)Session["coverageJSON"];
+        }
+        var data = @Html.Raw(serializedObject);
+
+        var margin = { top: 40, right: 20, bottom: 30, left: 40 },
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+        var formatPercent = d3.format(".0%");
+
+        //var x = d3.scaleOrdinal([0, width], .1);
+        var x = d3.scaleTime();
+
+        var y = d3.scaleLinear();
+
+        var xAxis = d3.axisBottom()
+            .scale(x);
+
+        var yAxis = d3.axisLeft()
+            .scale(y)
+            .tickFormat(formatPercent);
+
+        var tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html(function (d) {
+                return "<strong>" + d.date.toISOString().substr(0, 7) + "</strong><br />\
+                        <strong>Risk:</strong> <span style='color:red'>" + (100 - d.chance * 100) + "%</span>";
+            })
+
+        var svg = d3.select("#riskChart")//d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        svg.call(tip);
+
+        data.forEach(function(el) {
+            el["date"] = new Date(el["date"]); //d3.timeFormat("%x")(new Date(el["date"]));
+        });
+
+        x.domain([data[0].date, data[data.length - 1].date]).range([0, width]); //.addDays(30)
+        y.domain([0, 1]);
+        y.range([5, height]); // -5 because we want the 0-values to be still visible
+        //y.domain([height, 0]);
+
+        var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds
+        var daysSpan = Math.round(Math.abs((x.domain()[0].getTime() - x.domain()[1].getTime())/(oneDay)));
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+    .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Risk");
+
+        svg.selectAll(".bar")
+        .data(data)
+    .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", function (d) { return x(d.date); })
+        .attr("width", function (d) { return x.range()[1] / daysSpan * new Date(d.date.getFullYear(), d.date.getMonth(), 0).getDate(); })
+        .attr("y", function (d) { return height - y(d.chance); })
+        .attr("height", function (d) { return y(d.chance); })
+        .on('mouseover', tip.show)
+        .on('mouseout', tip.hide)
+    });
+</script>

@@ -1,0 +1,67 @@
+﻿@using UI.Models
+@using Optimization.DataModel;
+@model ScheduleViewModel
+@{
+    ViewBag.Title = "BaselineSelection";
+}
+
+<h2>Baseline Selection</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="form-group" style="height:600px; overflow:auto;">
+        <table id="baselineTable" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Use?</th>
+                    <th>Margin</th>
+                    <th>Days Overlay</th>
+                    <th>Insecurity</th>
+                    <th>Used Projects</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    for (int i = 0; i < Model.AllBaselines.Count; i++)
+                    {
+                        var baseline = Model.AllBaselines[i];
+                        string chkd = (Model.SelectedBaselines.Contains(baseline)) ? "checked=\"checked\"" : string.Empty;
+                        string descriptions = string.Join("\n", baseline.Projects.Select(p => p.Description));
+                        <tr>
+                            <td data-order="@(Model.SelectedBaselines.Contains(baseline) ? "1" : "0")"><input type="checkbox" name="baseline_@i" @(chkd)></td>
+                            <td>@baseline.CalculateTotalMargin()</td>
+                            <td>@baseline.CalculateTotalDaysOfOverlay()</td>
+                            <td>@(baseline.CalculateInsecurity() * 100)%</td>
+                            <td data-order="@(baseline.Projects.Count)">
+                                <span data-toggle="tooltip" data-placement="right" title="@descriptions">@(baseline.Projects.Count) projects</span>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="alert alert-warning" role="alert">
+        <strong>Warning!</strong> Projects x and y are badly combineable
+    </div>
+
+    @Html.Partial("_WizardFooter", new WizardViewModel() { Step = 2 })
+}
+@section scripts {
+    <script>
+    $(document).ready(function() {
+        baselineTable = $('#baselineTable').DataTable({
+            "order": [[1, "desc"]]
+        });
+        $('#baselineTable input:checkbox').click(function () {
+            var i = $(this);
+            i.parent().attr('data-order', i.is(":checked") ? "1" : "0");
+            baselineTable
+                .row(i.parent().parent())
+                .invalidate()
+                .draw();
+        })
+    });
+    </script>
+}
