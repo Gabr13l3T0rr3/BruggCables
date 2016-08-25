@@ -11,8 +11,8 @@ namespace Optimization.BaselineSelectors
     {
         public const double overLoadRatio = 1.1;
 
-        public const double baselineMinRevenue = 1500000d;
-        public const double baselineMaxRevenue = 6000000d;
+        public const double firstSelectionOverloadL1 = 3.0;
+        public const double firstSelectionOverloadL2 = 3.0;
 
         private Dictionary<int, List<Project>> groupedByWeek;
 
@@ -40,18 +40,18 @@ namespace Optimization.BaselineSelectors
             var baseLines = GetSecondCombination(projects, firstSelection, priorities, startDate, schedDays);
         
             var bl = baseLines.Select(b => new Baseline(b.Select(p => (Project)p).ToList())).ToList();
-            /* foreach (Baseline b in bl)
-            {
-                Console.WriteLine(b.CalculateTotalMargin());
-                Console.WriteLine(b.CalculateTotalDaysOfOverlay(scenario));
-                Console.WriteLine();
-            }*/
+
+            List<Double> delay = new List<Double>();
+            foreach (Baseline b in bl) {delay.Add(b.CalculateTotalDaysOfOverlay(scenario)); }
+         
             return bl;
         }
 
 
         private List<List<List<Opportunity>>> ComputeFirstSelection(List<Project> projects, DateTime startDate)
         {
+            ProductionParameters parameter = new ProductionParameters();
+
             var firstSelection = new List<List<List<Opportunity>>>();
             var numberMonths = getNumberMonths(projects);
 
@@ -64,7 +64,7 @@ namespace Optimization.BaselineSelectors
                 var fixProj = projects.Where(p => p.DeliveryDate >= lowBound && p.DeliveryDate < highBound && p is FixedProject).
                                                 Select(p => (FixedProject)p).ToArray();
 
-                var openOff = projects.Where(p => p.Revenue >= baselineMinRevenue && p.Revenue <= baselineMaxRevenue &&
+                var openOff = projects.Where(p => p.Revenue >= parameter.BaselineMinRevenue && p.Revenue <= parameter.BaselineMaxRevenue &&
                                                            p.DeliveryDate >= lowBound && p.DeliveryDate < highBound && p is Opportunity).
                                                 Select(p => (Opportunity)p).ToArray();
 
@@ -81,8 +81,8 @@ namespace Optimization.BaselineSelectors
         {
 
             //production limit
-            var availableHoursL1 = monthDays * 24.0;
-            var availableHoursL2 = monthDays * 24.0;
+            var availableHoursL1 = monthDays * 24.0 * firstSelectionOverloadL1;
+            var availableHoursL2 = monthDays * 24.0 * firstSelectionOverloadL2;
 
             //projects workload 
             var projLoadL1 = fixProj.Where(p => p.Batches[0].Compatibility == Batch.LineCompatibility.Line1).Select(p => p.Batches[0].UsedWorkHours).Sum();
@@ -104,7 +104,7 @@ namespace Optimization.BaselineSelectors
                     var totLoadL2 = projLoadL2 + offLoadL2;
                     var totLoadBt = projLoadBt + offLoadBt;
 
-                    if (totLoadL1 <= availableHoursL1 || totLoadL2 <= availableHoursL1 || totLoadL1 + totLoadL2 + totLoadBt <= availableHoursL1 + availableHoursL2)
+                    if (totLoadL1 <= availableHoursL1 && totLoadL2 <= availableHoursL2 && totLoadL1 + totLoadL2 + totLoadBt <= availableHoursL1 + availableHoursL2)
                     {
                         fisrtComb.Add(offComb[i]);
                     }
@@ -114,7 +114,6 @@ namespace Optimization.BaselineSelectors
         }
 
 
-
         private List<List<Opportunity>> GetSecondCombination(List<Project> projects, List<List<List<Opportunity>>> firstSelection, List<Opportunity> priorities, DateTime startDate, double schedDays) {
 
             var nClusters = firstSelection.Count();
@@ -122,22 +121,29 @@ namespace Optimization.BaselineSelectors
             var fixProj = projects.Where(p => p is FixedProject).Select(p => (FixedProject)p).ToArray();
 
             int[] nItems = firstSelection.Select(list => list.Count()).ToArray();
-            int nComb = nItems.Aggregate((acc, val) => acc * val);
+            int nComb = nItems.Where(i => i > 0).Select(i => i).ToArray().Aggregate((acc, val) => acc * val);
 
             var indices = new int[nClusters];
 
-            for (int iter = 0; iter < nComb; iter++){
+            for (int iter = 0; iter < nComb; iter++) {
 
                 var offSel = new List<List<Opportunity>>();
-                for (int i = 0; i < nClusters; i++){offSel.Add(firstSelection[i][indices[i]]);}
+
+                for (int i = 0; i < nClusters; i++)
+                {
+                    if (firstSelection[i].Count() > 0)
+                    {
+                        offSel.Add(firstSelection[i][indices[i]]);
+                    }
+                }  
 
                 var selection = offSel.SelectMany(x => x).ToList();
-                if (priorities != null){ selection.AddRange(priorities); }
-                                        
+                if (priorities != null) { selection.AddRange(priorities); }
+
                 var wlDistr = getWorkloadDistribution(projects, selection, fixProj, startDate);
 
-                if (checkLoadDistributionSecSel(projects, wlDistr, schedDays) == true){ secondCombination.Add(selection); }
-
+                if (checkLoadDistributionSecSel(projects, wlDistr, schedDays) == true) { secondCombination.Add(selection); }
+                
                 // update rule
                 indices[0] += 1;
                 for (int i = 0; i < nClusters-1; i++) {
@@ -155,8 +161,8 @@ namespace Optimization.BaselineSelectors
 
             var numberMonths = getNumberMonths(scenario);
             // check on the local workload (< 1.1 * Available Hours)
-            var schedHoursL1 = schedDays * 24;
-            var schedHoursL2 = schedDays * 24;
+            var schedHoursL1 = schedDays * 24 ;
+            var schedHoursL2 = schedDays * 24 ; 
 
             bool checkLocalHours = true;
             double totalworkload = 0.0;
@@ -237,6 +243,7 @@ namespace Optimization.BaselineSelectors
 
             return workLoad;
         }
+
 
         private List<List<Opportunity>> PowerSetGeneration(Opportunity[] openOff){
 
