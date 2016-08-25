@@ -1,0 +1,1 @@
+X:\Projects\BruggCables\CSharp\BruggCables\Optimization\bin\Debug\Optimization.exe.config
